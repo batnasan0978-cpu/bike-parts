@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BikeShop MN | Дугуйны сэлбэг дэлгүүр</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #f0f4f9; color: #1a2e3f; }
+        .header { background: white; padding: 15px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 200; }
+        .logo h1 { font-size: 1.6rem; background: linear-gradient(135deg, #0b5e43, #1f8a62); background-clip: text; -webkit-background-clip: text; color: transparent; cursor: pointer; }
+        .nav-icons { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .nav-icons div, .nav-icons button { cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500; padding: 8px 16px; border-radius: 40px; transition: 0.2s; background: none; border: none; font-size: 0.9rem; }
+        .nav-icons div:hover, .nav-icons button:hover { background: #eef3fc; }
+        .user-btn { background: #1f6e4f !important; color: white !important; }
+        .admin-btn { background: #c0392b !important; color: white !important; display: none !important; }
+        .admin-btn.visible { display: flex !important; }
+        .badge { background: #e25c3c; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; display: inline-flex; align-items: center; justify-content: center; }
+        .hero { background: linear-gradient(120deg, #1a5e48, #278a64); margin: 20px 24px; border-radius: 32px; padding: 40px; color: white; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .hero button { background: #ffb347; border: none; padding: 12px 28px; border-radius: 40px; font-weight: bold; cursor: pointer; }
+        .filter-bar { background: white; margin: 20px 24px; padding: 16px 24px; border-radius: 60px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
+        .search-box { flex: 2; background: #f5f9fe; border-radius: 60px; padding: 6px 20px; display: flex; align-items: center; }
+        .search-box input { width: 100%; border: none; background: transparent; padding: 12px; outline: none; }
+        .categories { display: flex; flex-wrap: wrap; gap: 10px; }
+        .cat-chip { background: #eff3f8; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; }
+        .cat-chip.active { background: #1f6e4f; color: white; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin: 20px 24px; }
+        .product-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: 0.25s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px -10px rgba(0,0,0,0.15); }
+        .product-img { width: 100%; height: 180px; object-fit: cover; background: #eef2ef; }
+        .product-info { padding: 16px; }
+        .product-title { font-size: 1.1rem; font-weight: 700; }
+        .product-price { font-size: 1.2rem; font-weight: 800; color: #1d6e4f; margin: 8px 0; }
+        .add-cart { width: 100%; background: #102e29; border: none; padding: 10px; border-radius: 40px; color: white; font-weight: 600; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 32px; padding: 28px; max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 30px; font-size: 0.9rem; }
+        .btn-primary { background: #1f6e4f; color: white; border: none; padding: 12px; border-radius: 40px; width: 100%; font-weight: bold; margin: 8px 0; cursor: pointer; }
+        .btn-secondary { background: #e0e8f0; color: #1a2e3f; border: none; padding: 10px; border-radius: 40px; width: 100%; cursor: pointer; }
+        footer { text-align: center; padding: 24px; color: #6d8eaa; }
+        .image-preview { margin: 10px 0; text-align: center; }
+        .image-preview img { max-width: 150px; max-height: 150px; border-radius: 12px; object-fit: cover; }
+        .order-item { border: 1px solid #ddd; border-radius: 16px; padding: 12px; margin: 10px 0; }
+        .status-pending { background: #fff3e0; color: #cc7b00; display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 0.75rem; }
+        .status-shipping { background: #e3f2fd; color: #1565c0; display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 0.75rem; }
+        .status-delivered { background: #e8f5e9; color: #2e7d32; display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 0.75rem; }
+        .image-upload-area { border: 2px dashed #ccc; border-radius: 20px; padding: 20px; text-align: center; margin: 15px 0; background: #fafafa; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo" onclick="location.reload()"><h1>🚲 BikeShop Mongolia</h1></div>
+    <div class="nav-icons">
+        <div id="openCartBtn">🛒 Сагс (<span id="cartCountBadge">0</span>)</div>
+        <div id="openProfileBtn" class="user-btn">👤 Нэвтрэх</div>
+        <button id="adminBtn" class="admin-btn">👑 Админ</button>
+    </div>
+</div>
+
+<div class="hero">
+    <div>
+        <h2>Дугуйн чанартай сэлбэг</h2>
+        <p>Тоормос, гинж, гэрэл, дугуй, багаж — бүгд нэг дороос</p>
+        <button id="shopNowBtn">Дэлгүүрээр харах →</button>
+    </div>
+    <div style="font-size: 4rem;">🚴‍♂️</div>
+</div>
+
+<div class="filter-bar">
+    <div class="search-box">🔍 <input type="text" id="searchInput" placeholder="Хайх..."></div>
+    <div class="categories" id="categoryContainer">
+        <div class="cat-chip active" data-cat="all">Бүгд</div>
+        <div class="cat-chip" data-cat="brake">🛑 Тоормос</div>
+        <div class="cat-chip" data-cat="chain">⛓️ Гинж</div>
+        <div class="cat-chip" data-cat="light">💡 Гэрэл</div>
+        <div class="cat-chip" data-cat="tire">🛞 Дугуй</div>
+        <div class="cat-chip" data-cat="tool">🔧 Багаж</div>
+    </div>
+</div>
+
+<div class="products-grid" id="productsGrid"></div>
+<footer>© 2025 BikeShop Mongolia — дугуйчин бүрт чанартай сэлбэг</footer>
+
+<!-- Modals (same as before - kept minimal for brevity) -->
+<div id="profileModal" class="modal"><div class="modal-content"><div class="modal-header"><span id="modalTitle">👤 Нэвтрэх</span><button class="close-modal" id="closeProfileModal">&times;</button></div>
+<div id="loginForm"><input type="text" id="loginUsername" placeholder="Хэрэглэгчийн нэр"><input type="password" id="loginPassword" placeholder="Нууц үг"><button class="btn-primary" id="doLoginBtn">Нэвтрэх</button><button class="btn-secondary" id="showRegisterBtn">Шинэ хэрэглэгч? Бүртгүүлэх</button></div>
+<div id="registerForm" style="display:none;"><input type="text" id="regUsername" placeholder="Хэрэглэгчийн нэр"><input type="email" id="regEmail" placeholder="Имэйл"><input type="password" id="regPassword" placeholder="Нууц үг"><input type="password" id="regConfirmPassword" placeholder="Нууц үг баталгаажуулах"><button class="btn-primary" id="doRegisterBtn">Бүртгүүлэх</button><button class="btn-secondary" id="showLoginBtn">Бүртгэлтэй юу? Нэвтрэх</button></div>
+<div id="profileInfo" style="display:none;"><p><strong>✅ Нэвтэрсэн:</strong> <span id="profileUsername"></span></p><button class="btn-secondary" id="logoutBtn">Гарах</button><hr><h4>📦 Миний захиалгууд</h4><div id="userOrdersList"></div></div></div></div>
+
+<div id="cartModal" class="modal"><div class="modal-content"><div class="modal-header"><span>🛒 Таны сагс</span><button class="close-modal" id="closeCartModal">&times;</button></div>
+<div id="cartItemsList"></div><div style="font-weight:800; font-size:1.2rem;">Нийт: <span id="cartTotal">$0.00</span></div>
+<div style="margin-top:16px;"><input type="text" id="customerName" placeholder="Нэр"><input type="text" id="customerPhone" placeholder="Утас"><textarea id="customerAddress" placeholder="Хаяг" rows="2"></textarea><button class="btn-primary" id="submitOrderBtn">Захиалга хийх</button><button id="clearCartBtn" style="background:none; border:none; color:#c0392b;">Хоослох</button></div></div></div>
+
+<div id="adminModal" class="modal"><div class="modal-content"><div class="modal-header"><span>👑 Админ хяналтын самбар</span><button class="close-modal" id="closeAdminModal">&times;</button></div>
+<div id="adminLoginSection"><h3>Админ нэвтрэх</h3><input type="password" id="adminPassword" placeholder="Админ нууц үг"><button class="btn-primary" id="doAdminLoginBtn">Нэвтрэх</button><p style="margin-top:10px;">Нууц үг: <strong>admin123</strong></p></div>
+<div id="adminPanelSection" style="display:none;"><div style="display:flex; gap:10px; margin-bottom:20px;"><button class="admin-tab active" data-tab="orders">📦 Захиалга</button><button class="admin-tab" data-tab="products">🛍️ Бүтээгдэхүүн</button><button class="admin-tab" data-tab="reviews">⭐ Сэтгэгдэл</button></div>
+<div id="adminOrdersTab"><div id="adminOrdersList"></div></div>
+<div id="adminProductsTab" style="display:none;">
+    <h3>➕ Шинэ бүтээгдэхүүн нэмэх</h3>
+    <div class="image-upload-area">
+        <div id="adminImagePreview" class="image-preview">🖼️ Зураг сонгоогүй</div>
+        <input type="file" id="adminImageFile" accept="image/*" style="margin:10px 0;">
+        <p style="font-size:0.8rem; color:#888;">* Зураг сонгох эсвэл доор URL оруулах</p>
+        <input type="text" id="adminImageUrl" placeholder="Эсвэл зургийн URL (тогтмол) жишээ: https://example.com/brake.jpg">
+    </div>
+    <input type="text" id="adminProductName" placeholder="Бүтээгдэхүүний нэр">
+    <input type="number" id="adminProductPrice" placeholder="Үнэ">
+    <select id="adminProductCategory"><option value="brake">Тоормос</option><option value="chain">Гинж</option><option value="light">Гэрэл</option><option value="tire">Дугуй</option><option value="tool">Багаж</option></select>
+    <button class="btn-primary" id="saveProductBtn">💾 Бүтээгдэхүүн хадгалах</button>
+    <h3 style="margin-top:30px;">📦 Бүтээгдэхүүн жагсаалт</h3>
+    <div id="adminProductsList"></div>
+</div>
+<div id="adminReviewsTab" style="display:none;"><h4>Шинэ сэтгэгдэл</h4><input type="text" id="newReviewName" placeholder="Нэр"><input type="text" id="newReviewText" placeholder="Сэтгэгдэл"><button class="btn-primary" id="addReviewBtn">Нэмэх</button><div id="adminReviewsList"></div></div>
+</div></div></div>
+
+<script>
+    // ========== ТОГТМОЛ ЗУРАГТАЙ ПРОДУКТУУД (Reload хийсэн ч өөрчлөгдөхгүй) ==========
+    let products = [
+        { id: 1, name: "Hydraulic Disc Brake", category: "brake", price: 49.99, image: "https://i.imgur.com/8XjLZ5s.jpg" },
+        { id: 2, name: "Bike Chain 116L", category: "chain", price: 24.90, image: "https://i.imgur.com/YKj5kZR.jpg" },
+        { id: 3, name: "LED Rechargeable Set", category: "light", price: 19.99, image: "https://i.imgur.com/QXqY7jZ.jpg" },
+        { id: 4, name: "Phone Mount Pro", category: "tool", price: 14.99, image: "https://i.imgur.com/LnZq7kY.jpg" },
+        { id: 5, name: "Mountain Tire 27.5\"", category: "tire", price: 39.95, image: "https://i.imgur.com/kJqY8nZ.jpg" },
+        { id: 6, name: "Multi-tool 16in1", category: "tool", price: 18.50, image: "https://i.imgur.com/RxYq7kJ.jpg" }
+    ];
+
+    // Хэрэглэгчид
+    let users = JSON.parse(localStorage.getItem('bikeUsers')) || [];
+    let currentUser = null;
+    let cart = {};
+    let allOrders = JSON.parse(localStorage.getItem('bikeOrders')) || [];
+    let reviews = JSON.parse(localStorage.getItem('bikeReviews')) || [
+        { name: "Б.Отгонбаяр", text: "Гинж маш чанартай, хүргэлт хурдан" },
+        { name: "Ч.Ариука", text: "Гэрэл нь тун тод, шөнө дугуй унахад тохиромжтой" }
+    ];
+
+    // Функцүүд
+    function saveProducts() { localStorage.setItem('bikeProducts', JSON.stringify(products)); }
+    function saveUsers() { localStorage.setItem('bikeUsers', JSON.stringify(users)); }
+    function saveOrders() { localStorage.setItem('bikeOrders', JSON.stringify(allOrders)); }
+    function saveReviews() { localStorage.setItem('bikeReviews', JSON.stringify(reviews)); }
+    
+    function saveCart() { 
+        if (currentUser) localStorage.setItem(`cart_${currentUser.username}`, JSON.stringify(cart));
+        else localStorage.setItem('guest_cart', JSON.stringify(cart));
+    }
+    
+    function loadCart() {
+        if (currentUser) {
+            const saved = localStorage.getItem(`cart_${currentUser.username}`);
+            cart = saved ? JSON.parse(saved) : {};
+        } else {
+            const saved = localStorage.getItem('guest_cart');
+            cart = saved ? JSON.parse(saved) : {};
+        }
+        updateCartUI();
+    }
+
+    // Хадгалсан продуктыг ачаалах (тогтмол зургууд хадгалагдана)
+    function loadProducts() {
+        const stored = localStorage.getItem('bikeProducts');
+        if (stored) {
+            products = JSON.parse(stored);
+        } else {
+            // Хэрэв localStorage хоосон бол анхны products-г хадгалах
+            saveProducts();
+        }
+    }
+
+    let currentCategory = "all";
+    let searchKeyword = "";
+
+    function updateCartUI() {
+        let total = 0, count = 0, html = "";
+        const items = Object.values(cart);
+        if (items.length === 0) html = '<p style="text-align:center;">🛒 Сагс хоосон</p>';
+        else {
+            items.forEach(item => {
+                total += item.price * item.quantity;
+                count += item.quantity;
+                html += `<div style="display:flex; justify-content:space-between; margin:10px 0;">${item.name} x${item.quantity} <b>$${(item.price*item.quantity).toFixed(2)}</b></div>`;
+            });
+        }
+        document.getElementById("cartItemsList").innerHTML = html;
+        document.getElementById("cartTotal").innerText = `$${total.toFixed(2)}`;
+        document.getElementById("cartCountBadge").innerText = count;
+        saveCart();
+    }
+
+    function addToCart(product) {
+        if (cart[product.id]) cart[product.id].quantity++;
+        else cart[product.id] = { ...product, quantity: 1 };
+        updateCartUI();
+    }
+
+    function renderProducts() {
+        let filtered = products.filter(p => {
+            const matchCat = currentCategory === "all" || p.category === currentCategory;
+            const matchSearch = p.name.toLowerCase().includes(searchKeyword.toLowerCase());
+            return matchCat && matchSearch;
+        });
+        const grid = document.getElementById("productsGrid");
+        if (filtered.length === 0) { grid.innerHTML = '<div style="text-align:center;">😢 Бүтээгдэхүүн олдсонгүй</div>'; return; }
+        grid.innerHTML = filtered.map(p => `
+            <div class="product-card">
+                <img src="${p.image}" class="product-img" onerror="this.src='https://placehold.co/300x180/e0e0e0/666?text=No+Image'">
+                <div class="product-info">
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">$${p.price}</div>
+                    <button class="add-cart" data-id="${p.id}">+ Сагслах</button>
+                </div>
+            </div>
+        `).join("");
+        document.querySelectorAll(".add-cart").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const id = parseInt(btn.dataset.id);
+                const prod = products.find(p => p.id === id);
+                if (prod) addToCart(prod);
+            });
+        });
+    }
+
+    function createOrder(name, phone, address) {
+        const itemsArray = Object.values(cart);
+        if (itemsArray.length === 0) return null;
+        const itemsSummary = itemsArray.map(i => `${i.name} x${i.quantity}`).join(', ');
+        const total = itemsArray.reduce((s, i) => s + (i.price * i.quantity), 0);
+        const newOrder = {
+            orderId: `#BIKE-${String(allOrders.length+1).padStart(3,'0')}`,
+            customerName: name,
+            customerPhone: phone,
+            address: address,
+            itemsSummary: itemsSummary,
+            total: total.toFixed(2),
+            status: "Боловсруулалтад",
+            date: new Date().toLocaleString('mn-MN'),
+            username: currentUser ? currentUser.username : null
+        };
+        allOrders.unshift(newOrder);
+        saveOrders();
+        return newOrder;
+    }
+
+    // Admin функцүүд
+    function renderAdminOrders() {
+        const container = document.getElementById("adminOrdersList");
+        if (!container) return;
+        if (allOrders.length === 0) { container.innerHTML = "<p>Захиалга байхгүй</p>"; return; }
+        container.innerHTML = allOrders.map((order, idx) => `
+            <div class="order-item">
+                <div><strong>${order.orderId}</strong> | ${order.customerName} | ${order.date}</div>
+                <div>${order.itemsSummary}</div>
+                <div>Нийт: $${order.total}</div>
+                <div>
+                    <select class="order-status-select" data-idx="${idx}">
+                        <option value="Боловсруулалтад" ${order.status === "Боловсруулалтад" ? "selected" : ""}>Боловсруулалтад</option>
+                        <option value="Замдаа" ${order.status === "Замдаа" ? "selected" : ""}>Замдаа</option>
+                        <option value="Хүргэгдсэн" ${order.status === "Хүргэгдсэн" ? "selected" : ""}>Хүргэгдсэн</option>
+                    </select>
+                    <button class="delete-order-btn" data-idx="${idx}" style="background:#c0392b; color:white; border:none; padding:4px 12px; border-radius:20px;">Устгах</button>
+                </div>
+            </div>
+        `).join("");
+        document.querySelectorAll(".order-status-select").forEach(select => {
+            select.addEventListener("change", (e) => {
+                const idx = parseInt(select.dataset.idx);
+                allOrders[idx].status = select.value;
+                saveOrders();
+                renderAdminOrders();
+            });
+        });
+        document.querySelectorAll(".delete-order-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                if(confirm("Устгах уу?")) { allOrders.splice(idx, 1); saveOrders(); renderAdminOrders(); }
+            });
+        });
+    }
+
+    function renderAdminProducts() {
+        const container = document.getElementById("adminProductsList");
+        if (!container) return;
+        container.innerHTML = products.map(p => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eee;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${p.image}" style="width:50px; height:50px; object-fit:cover; border-radius:10px;" onerror="this.src='https://placehold.co/50x50/e0e0e0/666?text=?'">
+                    <div><strong>${p.name}</strong><br><small>$${p.price} | ${p.category}</small></div>
+                </div>
+                <button class="delete-product-admin" data-id="${p.id}" style="background:#c0392b; color:white; border:none; padding:6px 16px; border-radius:20px;">Устгах</button>
+            </div>
+        `).join("");
+        document.querySelectorAll(".delete-product-admin").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const id = parseInt(btn.dataset.id);
+                if(confirm("Бүтээгдэхүүнийг устгах уу?")) {
+                    products = products.filter(p => p.id !== id);
+                    saveProducts();
+                    renderAdminProducts();
+                    renderProducts();
+                }
+            });
+        });
+    }
+
+    function renderAdminReviews() {
+        const container = document.getElementById("adminReviewsList");
+        if (!container) return;
+        container.innerHTML = reviews.map((r, idx) => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                <div><strong>${r.name}</strong>: ${r.text}</div>
+                <button class="delete-review-admin" data-idx="${idx}" style="background:#c0392b; color:white; border:none; padding:4px 12px; border-radius:20px;">Устгах</button>
+            </div>
+        `).join("");
+        document.querySelectorAll(".delete-review-admin").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                reviews.splice(idx, 1);
+                saveReviews();
+                renderAdminReviews();
+            });
+        });
+    }
+
+    // ========== ШИНЭ БҮТЭЭГДЭХҮҮН НЭМЭХ (ЗУРГАА ТОГТМОЛ ХАДГАЛАХ) ==========
+    let selectedImageData = null;
+
+    document.getElementById("adminImageFile").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                selectedImageData = event.target.result;
+                document.getElementById("adminImagePreview").innerHTML = `<img src="${selectedImageData}" style="max-width:150px; border-radius:12px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById("adminImageUrl").addEventListener("input", function(e) {
+        const url = e.target.value.trim();
+        if (url) {
+            selectedImageData = url;
+            document.getElementById("adminImagePreview").innerHTML = `<img src="${url}" style="max-width:150px; border-radius:12px;" onerror="this.src='https://placehold.co/150x150/e0e0e0/666?text=Error'">`;
+        }
+    });
+
+    document.getElementById("saveProductBtn").addEventListener("click", function() {
+        const name = document.getElementById("adminProductName").value.trim();
+        const price = parseFloat(document.getElementById("adminProductPrice").value);
+        const category = document.getElementById("adminProductCategory").value;
+        
+        if (!name || isNaN(price)) {
+            alert("Нэр, үнээ бөглөнө үү!");
+            return;
+        }
+        
+        // Хэрэв зураг сонгоогүй бол default зураг ашиглах
+        let finalImage = selectedImageData;
+        if (!finalImage) {
+            finalImage = "https://placehold.co/300x180/1f6e4f/white?text=New+Product";
+        }
+        
+        const newId = Math.max(...products.map(p => p.id), 0) + 1;
+        const newProduct = {
+            id: newId,
+            name: name,
+            price: price,
+            category: category,
+            image: finalImage  // Тогтмол хадгалагдана!
+        };
+        
+        products.push(newProduct);
+        saveProducts();
+        renderAdminProducts();
+        renderProducts();
+        
+        // Формыг цэвэрлэх
+        document.getElementById("adminProductName").value = "";
+        document.getElementById("adminProductPrice").value = "";
+        document.getElementById("adminImageFile").value = "";
+        document.getElementById("adminImageUrl").value = "";
+        document.getElementById("adminImagePreview").innerHTML = "🖼️ Зураг сонгоогүй";
+        selectedImageData = null;
+        
+        alert("✅ Бүтээгдэхүүн амжилттай нэмэгдлээ! Зураг тогтмол хадгалагдлаа.");
+    });
+
+    // Админ нэвтрэх болон бусад event listeners
+    let clickCount = 0, clickTimer = null, keyBuffer = "";
+    function showAdminButton() {
+        const adminBtn = document.getElementById("adminBtn");
+        adminBtn.classList.add("visible");
+        setTimeout(() => {
+            if (document.getElementById("adminModal").style.display !== "flex") {
+                adminBtn.classList.remove("visible");
+            }
+        }, 10000);
+    }
+    document.querySelector(".logo").addEventListener("click", () => { clickCount++; if (clickTimer) clearTimeout(clickTimer); clickTimer = setTimeout(() => { clickCount = 0; }, 800); if (clickCount >= 3) { clickCount = 0; showAdminButton(); } });
+    document.addEventListener("keydown", (e) => { keyBuffer += e.key; if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5); if (keyBuffer.toLowerCase() === "admin") { keyBuffer = ""; showAdminButton(); } });
+    document.querySelector("footer").addEventListener("dblclick", () => { showAdminButton(); });
+
+    document.getElementById("adminBtn").addEventListener("click", () => {
+        document.getElementById("adminModal").style.display = "flex";
+        document.getElementById("adminLoginSection").style.display = "block";
+        document.getElementById("adminPanelSection").style.display = "none";
+    });
+    document.getElementById("closeAdminModal").addEventListener("click", () => { document.getElementById("adminModal").style.display = "none"; document.getElementById("adminBtn").classList.remove("visible"); });
+    document.getElementById("doAdminLoginBtn").addEventListener("click", () => {
+        const pwd = document.getElementById("adminPassword").value;
+        if (pwd === "admin123") {
+            document.getElementById("adminLoginSection").style.display = "none";
+            document.getElementById("adminPanelSection").style.display = "block";
+            renderAdminOrders();
+            renderAdminProducts();
+            renderAdminReviews();
+        } else alert("Нууц үг буруу!");
+    });
+    document.querySelectorAll(".admin-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            document.getElementById("adminOrdersTab").style.display = tab.dataset.tab === "orders" ? "block" : "none";
+            document.getElementById("adminProductsTab").style.display = tab.dataset.tab === "products" ? "block" : "none";
+            document.getElementById("adminReviewsTab").style.display = tab.dataset.tab === "reviews" ? "block" : "none";
+            if (tab.dataset.tab === "orders") renderAdminOrders();
+            if (tab.dataset.tab === "products") renderAdminProducts();
+            if (tab.dataset.tab === "reviews") renderAdminReviews();
+        });
+    });
+
+    document.getElementById("addReviewBtn").addEventListener("click", () => {
+        const name = document.getElementById("newReviewName").value.trim();
+        const text = document.getElementById("newReviewText").value.trim();
+        if (!name || !text) { alert("Нэр, сэтгэгдэлээ бөглөнө үү"); return; }
+        reviews.push({ name, text });
+        saveReviews();
+        renderAdminReviews();
+        document.getElementById("newReviewName").value = "";
+        document.getElementById("newReviewText").value = "";
+    });
+
+    // Cart болон бусад modal event listeners
+    document.getElementById("openCartBtn").addEventListener("click", () => { document.getElementById("cartModal").style.display = "flex"; updateCartUI(); });
+    document.getElementById("closeCartModal").addEventListener("click", () => { document.getElementById("cartModal").style.display = "none"; });
+    document.getElementById("clearCartBtn").addEventListener("click", () => { cart = {}; updateCartUI(); });
+    document.getElementById("submitOrderBtn").addEventListener("click", () => {
+        const name = document.getElementById("customerName").value.trim();
+        const phone = document.getElementById("customerPhone").value.trim();
+        const address = document.getElementById("customerAddress").value.trim();
+        if (!name || !phone || !address) { alert("Нэр, утас, хаягаа бөглөнө үү"); return; }
+        if (Object.keys(cart).length === 0) { alert("Сагс хоосон"); return; }
+        const order = createOrder(name, phone, address);
+        if (order) { alert(`✅ Захиалга амжилттай! Дугаар: ${order.orderId}`); cart = {}; updateCartUI(); document.getElementById("customerName").value = ""; document.getElementById("customerPhone").value = ""; document.getElementById("customerAddress").value = ""; document.getElementById("cartModal").style.display = "none"; if (currentUser) showUserProfile(); }
+    });
+
+    // Login/Register
+    document.getElementById("doLoginBtn").addEventListener("click", () => {
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const user = users.find(u => u.username === username && u.password === password);
+        if (user) { currentUser = user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); loadCart(); document.getElementById("profileModal").style.display = "none"; document.getElementById("openProfileBtn").innerHTML = `👤 ${username}`; document.getElementById("openProfileBtn").classList.add("user-btn"); alert(`Тавтай морил, ${username}!`); } else alert("Нэр эсвэл нууц үг буруу!");
+    });
+    document.getElementById("doRegisterBtn").addEventListener("click", () => {
+        const username = document.getElementById("regUsername").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value;
+        const confirm = document.getElementById("regConfirmPassword").value;
+        if (!username || !email || !password) { alert("Бүх талбарыг бөглөнө үү"); return; }
+        if (password !== confirm) { alert("Нууц үг таарахгүй байна"); return; }
+        if (users.find(u => u.username === username)) { alert("Энэ нэр аль хэдийн бүртгэлтэй"); return; }
+        users.push({ username, email, password });
+        saveUsers();
+        alert("Бүртгэл амжилттай! Одоо нэвтрэнэ үү.");
+        document.getElementById("showLoginBtn").click();
+    });
+    document.getElementById("logoutBtn").addEventListener("click", () => { currentUser = null; localStorage.removeItem('currentUser'); cart = {}; loadCart(); document.getElementById("openProfileBtn").innerHTML = `👤 Нэвтрэх`; alert("Гарлаа"); document.getElementById("profileModal").style.display = "none"; });
+    document.getElementById("showRegisterBtn").addEventListener("click", () => { document.getElementById("loginForm").style.display = "none"; document.getElementById("registerForm").style.display = "block"; document.getElementById("profileInfo").style.display = "none"; document.getElementById("modalTitle").innerText = "📝 Бүртгүүлэх"; });
+    document.getElementById("showLoginBtn").addEventListener("click", () => { document.getElementById("loginForm").style.display = "block"; document.getElementById("registerForm").style.display = "none"; document.getElementById("profileInfo").style.display = "none"; document.getElementById("modalTitle").innerText = "👤 Нэвтрэх"; });
+    document.getElementById("openProfileBtn").addEventListener("click", () => {
+        if (currentUser) { document.getElementById("loginForm").style.display = "none"; document.getElementById("registerForm").style.display = "none"; document.getElementById("profileInfo").style.display = "block"; document.getElementById("modalTitle").innerText = "👤 Миний профайл"; showUserProfile(); }
+        else { document.getElementById("loginForm").style.display = "block"; document.getElementById("registerForm").style.display = "none"; document.getElementById("profileInfo").style.display = "none"; document.getElementById("modalTitle").innerText = "👤 Нэвтрэх"; }
+        document.getElementById("profileModal").style.display = "flex";
+    });
+    document.getElementById("closeProfileModal").addEventListener("click", () => { document.getElementById("profileModal").style.display = "none"; });
+
+    function showUserProfile() {
+        if (!currentUser) return;
+        document.getElementById("profileUsername").innerText = currentUser.username;
+        const userOrders = allOrders.filter(o => o.username === currentUser.username);
+        const ordersHtml = userOrders.length === 0 ? "<p>Захиалга байхгүй</p>" : userOrders.map(o => `<div class="order-item"><strong>${o.orderId}</strong> | ${o.date}<br>${o.itemsSummary}<br>Нийт: $${o.total}<br><span class="status-${o.status === "Боловсруулалтад" ? "pending" : o.status === "Замдаа" ? "shipping" : "delivered"}">${o.status}</span></div>`).join('');
+        document.getElementById("userOrdersList").innerHTML = ordersHtml;
+    }
+
+    document.getElementById("searchInput").addEventListener("input", (e) => { searchKeyword = e.target.value; renderProducts(); });
+    document.querySelectorAll(".cat-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+            currentCategory = chip.dataset.cat;
+            renderProducts();
+        });
+    });
+    document.getElementById("shopNowBtn").addEventListener("click", () => { document.querySelector(".products-grid").scrollIntoView({ behavior: "smooth" }); });
+
+    window.onclick = (e) => {
+        if (e.target === document.getElementById("profileModal")) document.getElementById("profileModal").style.display = "none";
+        if (e.target === document.getElementById("cartModal")) document.getElementById("cartModal").style.display = "none";
+        if (e.target === document.getElementById("adminModal")) document.getElementById("adminModal").style.display = "none";
+    };
+
+    // Init
+    function init() {
+        loadProducts();  // localStorage-аас products ачаалах
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) { currentUser = JSON.parse(savedUser); document.getElementById("openProfileBtn").innerHTML = `👤 ${currentUser.username}`; document.getElementById("openProfileBtn").classList.add("user-btn"); }
+        loadCart();
+        renderProducts();
+    }
+    init();
+</script>
+</body>
+</html>

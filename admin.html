@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ хяналтын самбар | BikeShop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f0f4f9;
+            color: #1a2e3f;
+        }
+
+        /* Header */
+        .admin-header {
+            background: #1a2e3f;
+            color: white;
+            padding: 18px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h2 {
+            font-size: 1.5rem;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: #c0392b;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #1f6e4f;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #1f6e4f;
+            color: white;
+        }
+
+        /* Orders Table */
+        .orders-table {
+            background: white;
+            border-radius: 24px;
+            overflow-x: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f8;
+        }
+
+        th {
+            background: #f8fafd;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending { background: #fff3e0; color: #cc7b00; }
+        .status-shipping { background: #e3f2fd; color: #1565c0; }
+        .status-delivered { background: #e8f5e9; color: #2e7d32; }
+
+        select.status-select {
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+        }
+
+        .view-details-btn {
+            background: #eef3fc;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .delete-order {
+            background: none;
+            border: none;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 28px;
+            padding: 24px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Products management */
+        .add-product-form {
+            background: white;
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 40px;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #1f6e4f;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eef2f8;
+        }
+
+        .reviews-list {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .review-item {
+            padding: 12px;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 700px) {
+            .dashboard { padding: 16px; }
+            th, td { font-size: 0.8rem; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="logo">
+            <h2>🚲 BikeShop Admin</h2>
+            <p>Захиалга хянах самбар</p>
+        </div>
+        <div class="admin-info">
+            <span>👑 Админ</span>
+            <button class="logout-btn" onclick="logout()">Гарах</button>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Статистик картууд -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="orders">📦 Захиалга хянах</button>
+            <button class="tab-btn" data-tab="products">🛍️ Бүтээгдэхүүн</button>
+            <button class="tab-btn" data-tab="reviews">⭐ Сэтгэгдэл</button>
+        </div>
+
+        <!-- Захиалгын хэсэг -->
+        <div id="ordersTab" class="tab-content">
+            <div class="orders-table">
+                <h3 style="margin-bottom: 16px;">📋 Бүх захиалгууд</h3>
+                <div style="overflow-x: auto;">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr><th>Дугаар</th><th>Хэрэглэгч</th><th>Бүтээгдэхүүн</th><th>Нийт дүн</th><th>Огноо</th><th>Төлөв</th><th>Үйлдэл</th></tr>
+                        </thead>
+                        <tbody id="ordersList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Бүтээгдэхүүний хэсэг -->
+        <div id="productsTab" class="tab-content" style="display:none;">
+            <div class="add-product-form">
+                <h3>➕ Шинэ бүтээгдэхүүн нэмэх</h3>
+                <div class="form-group">
+                    <input type="text" id="newProductName" placeholder="Бүтээгдэхүүний нэр">
+                    <select id="newProductCategory">
+                        <option value="brake">Тоормос</option>
+                        <option value="chain">Гинж</option>
+                        <option value="light">Гэрэл</option>
+                        <option value="tire">Дугуй</option>
+                        <option value="tool">Багаж</option>
+                    </select>
+                    <input type="number" id="newProductPrice" placeholder="Үнэ">
+                    <input type="text" id="newProductEmoji" placeholder="Emoji (🛑)">
+                    <button class="btn-primary" onclick="addProduct()">Нэмэх</button>
+                </div>
+            </div>
+            <div class="orders-table">
+                <h3>📦 Бүтээгдэхүүний жагсаалт</h3>
+                <div id="productsList"></div>
+            </div>
+        </div>
+
+        <!-- Сэтгэгдлийн хэсэг -->
+        <div id="reviewsTab" class="tab-content" style="display:none;">
+            <div class="add-product-form">
+                <h3>✍️ Шинэ сэтгэгдэл нэмэх</h3>
+                <div class="form-group">
+                    <input type="text" id="newReviewName" placeholder="Нэр">
+                    <input type="text" id="newReviewText" placeholder="Сэтгэгдэл">
+                    <button class="btn-primary" onclick="addReview()">Нэмэх</button>
+                </div>
+            </div>
+            <div class="reviews-list">
+                <h3>⭐ Хэрэглэгчдийн сэтгэгдэл</h3>
+                <div id="reviewsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Захиалгын дэлгэрэнгүй modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>📄 Захиалгын дэлгэрэнгүй</span>
+                <button class="close-modal" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div id="orderDetails"></div>
+        </div>
+    </div>
+    <!-- Админ хэсэгт зураг оруулах хэсэг нэмэх -->
+<div class="add-product-form">
+    <h3>➕ Шинэ бүтээгдэхүүн зурагтай нэмэх</h3>
+    <input type="text" id="newProductName" placeholder="Бүтээгдэхүүний нэр">
+    <input type="number" id="newProductPrice" placeholder="Үнэ">
+    <select id="newProductCategory">
+        <option value="brake">Тоормос</option>
+        <option value="chain">Гинж</option>
+        <option value="light">Гэрэл</option>
+        <option value="tire">Дугуй</option>
+        <option value="tool">Багаж</option>
+        <option value="air fork">хийн амаржин</option>
+    </select>
+    
+    <!-- Зураг оруулах хэсэг -->
+    <input type="file" id="productImageInput" accept="image/*" style="margin:10px 0;">
+    <div id="imagePreview" style="margin:10px 0;"></div>
+    
+    <button class="btn-primary" id="addProductWithImageBtn">Бүтээгдэхүүн нэмэх</button>
+</div>
+
+    <script>
+        // ---------- ӨГӨГДӨЛ ----------
+        let products = [];
+        let orders = [];
+        let reviews = [];
+
+        // Ачаалах
+        function loadData() {
+            const storedProducts = localStorage.getItem('bikeProducts');
+            if (storedProducts) products = JSON.parse(storedProducts);
+            else {
+                products = [
+                    { id: 1, name: "Hydraulic Disc Brake", category: "brake", price: 49.99, emoji: "🛑" },
+                    { id: 2, name: "Bike Chain 116L", category: "chain", price: 24.90, emoji: "⛓️" },
+                    { id: 3, name: "LED Rechargeable Set", category: "light", price: 19.99, emoji: "💡" },
+                    { id: 4, name: "Phone Mount Pro", category: "tool", price: 14.99, emoji: "📱" },
+                    { id: 5, name: "Mountain Tire 27.5\"", category: "tire", price: 39.95, emoji: "🛞" },
+                    { id: 6, name: "Air Fork suspension", category: "air fork", price: 199.99, emoji: "🚲" }
+                ];
+                saveProducts();
+            }
+
+            const storedOrders = localStorage.getItem('bikeOrders');
+            if (storedOrders) orders = JSON.parse(storedOrders);
+            else orders = [];
+
+            const storedReviews = localStorage.getItem('bikeReviews');
+            if (storedReviews) reviews = JSON.parse(storedReviews);
+            else {
+                reviews = [
+                    { name: "Б.Отгонбаяр", text: "Гинж маш чанартай, хүргэлт хурдан" },
+                    { name: "Ч.Ариука", text: "Гэрэл нь тун тод" }
+                ];
+                saveReviews();
+            }
+        }
+
+        function saveProducts() { localStorage.setItem('bikeProducts', JSON.stringify(products)); }
+        function saveOrders() { localStorage.setItem('bikeOrders', JSON.stringify(orders)); }
+        function saveReviews() { localStorage.setItem('bikeReviews', JSON.stringify(reviews)); }
+
+        // Статистик
+        function renderStats() {
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.total), 0);
+            const pendingOrders = orders.filter(o => o.status === "Боловсруулалтад").length;
+            const totalProducts = products.length;
+            document.getElementById("statsGrid").innerHTML = `
+                <div class="stat-card"><h3>${totalOrders}</h3><p>Нийт захиалга</p></div>
+                <div class="stat-card"><h3>$${totalRevenue.toFixed(2)}</h3><p>Нийт борлуулалт</p></div>
+                <div class="stat-card"><h3>${pendingOrders}</h3><p>Хүлээгдэж буй</p></div>
+                <div class="stat-card"><h3>${totalProducts}</h3><p>Бүтээгдэхүүн</p></div>
+            `;
+        }
+
+        // ЗАХИАЛГА ХЯНАХ ХЭСЭГ (ГОЛ ХЭСЭГ)
+        function renderOrders() {
+            const tbody = document.getElementById("ordersList");
+            if (!tbody) return;
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Захиалга байхгүй</td></tr>';
+                return;
+            }
+            tbody.innerHTML = orders.map((order, idx) => {
+                let statusClass = "";
+                if (order.status === "Боловсруулалтад") statusClass = "status-pending";
+                else if (order.status === "Замдаа") statusClass = "status-shipping";
+                else statusClass = "status-delivered";
+                return `
+                    <tr>
+                        <td><strong>${order.orderId}</strong></td>
+                        <td>${order.customerName}<br><small>${order.customerPhone}</small></td>
+                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${order.itemsSummary.substring(0, 40)}${order.itemsSummary.length > 40 ? '...' : ''}</td>
+                        <td>$${order.total}</td>
+                        <td><small>${order.date}</small></td>
+                        <td>
+                            <select class="status-select" data-idx="${idx}" data-orderid="${order.orderId}">
+                                <option value="Боловсруулалтад" ${order.status === "Боловсруулалтад" ? "selected" : ""}>🟡 Боловсруулалтад</option>
+                                <option value="Замдаа" ${order.status === "Замдаа" ? "selected" : ""}>🚚 Замдаа</option>
+                                <option value="Хүргэгдсэн" ${order.status === "Хүргэгдсэн" ? "selected" : ""}>✅ Хүргэгдсэн</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="view-details-btn" onclick="viewOrderDetails(${idx})">Дэлгэрэнгүй</button>
+                            <button class="delete-order" onclick="deleteOrder(${idx})" title="Устгах">🗑</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Status select-д event listener нэмэх
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(select.dataset.idx);
+                    const newStatus = select.value;
+                    orders[idx].status = newStatus;
+                    saveOrders();
+                    renderOrders();
+                    renderStats();
+                    showNotification(`Захиалгын төлөв "${newStatus}" болгож өөрчиллөө`);
+                });
+            });
+        }
+
+        // Захиалгын дэлгэрэнгүй харах
+        function viewOrderDetails(idx) {
+            const order = orders[idx];
+            const modal = document.getElementById("orderModal");
+            const detailsDiv = document.getElementById("orderDetails");
+            detailsDiv.innerHTML = `
+                <p><strong>Захиалгын дугаар:</strong> ${order.orderId}</p>
+                <p><strong>Хэрэглэгч:</strong> ${order.customerName}</p>
+                <p><strong>Утас:</strong> ${order.customerPhone}</p>
+                <p><strong>Хаяг:</strong> ${order.address}</p>
+                <p><strong>Захиалсан бараа:</strong> ${order.itemsSummary}</p>
+                <p><strong>Нийт дүн:</strong> $${order.total}</p>
+                <p><strong>Төлөв:</strong> ${order.status}</p>
+                <p><strong>Огноо:</strong> ${order.date}</p>
+                <hr>
+                <h4>Төлөв өөрчлөх:</h4>
+                <select id="modalStatusSelect">
+                    <option value="Боловсруулалтад" ${order.status === "Боловсруулалтад" ? "selected" : ""}>Боловсруулалтад</option>
+                    <option value="Замдаа" ${order.status === "Замдаа" ? "selected" : ""}>Замдаа</option>
+                    <option value="Хүргэгдсэн" ${order.status === "Хүргэгдсэн" ? "selected" : ""}>Хүргэгдсэн</option>
+                </select>
+                <button class="btn-primary" style="margin-top:12px;" onclick="updateOrderStatusFromModal(${idx})">Шинэчлэх</button>
+            `;
+            modal.style.display = "flex";
+        }
+
+        function updateOrderStatusFromModal(idx) {
+            const newStatus = document.getElementById("modalStatusSelect").value;
+            orders[idx].status = newStatus;
+            saveOrders();
+            renderOrders();
+            renderStats();
+            closeOrderModal();
+            showNotification(`Төлөв "${newStatus}" болж өөрчлөгдлөө`);
+        }
+
+        function deleteOrder(idx) {
+            if (confirm(`"${orders[idx].orderId}" захиалгыг устгах уу?`)) {
+                orders.splice(idx, 1);
+                saveOrders();
+                renderOrders();
+                renderStats();
+                showNotification("Захиалга устгагдлаа");
+            }
+        }
+
+        function closeOrderModal() {
+            document.getElementById("orderModal").style.display = "none";
+        }
+
+        // Бүтээгдэхүүн удирдах
+        function renderProducts() {
+            const container = document.getElementById("productsList");
+            if (!container) return;
+            if (products.length === 0) {
+                container.innerHTML = "<p>Бүтээгдэхүүн байхгүй</p>";
+                return;
+            }
+            container.innerHTML = products.map(p => `
+                <div class="product-item">
+                    <div>${p.emoji} ${p.name} - $${p.price} (${p.category})</div>
+                    <button class="btn-danger" onclick="deleteProduct(${p.id})">Устгах</button>
+                </div>
+            `).join('');
+        }
+
+        function addProduct() {
+            const name = document.getElementById("newProductName").value.trim();
+            const category = document.getElementById("newProductCategory").value;
+            const price = parseFloat(document.getElementById("newProductPrice").value);
+            const emoji = document.getElementById("newProductEmoji").value.trim() || "🔧";
+            if (!name || isNaN(price)) { alert("Нэр, үнээ бөглөнө үү"); return; }
+            const newId = Math.max(...products.map(p=>p.id), 0) + 1;
+            products.push({ id: newId, name, category, price, emoji });
+            saveProducts();
+            renderProducts();
+            renderStats();
+            document.getElementById("newProductName").value = "";
+            document.getElementById("newProductPrice").value = "";
+            document.getElementById("newProductEmoji").value = "";
+            showNotification("Бүтээгдэхүүн нэмэгдлээ");
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Устгах уу?")) {
+                products = products.filter(p => p.id !== id);
+                saveProducts();
+                renderProducts();
+                renderStats();
+                showNotification("Бүтээгдэхүүн устгагдлаа");
+            }
+        }
+
+        // Сэтгэгдэл
+        function renderReviews() {
+            const container = document.getElementById("reviewsList");
+            if (!container) return;
+            if (reviews.length === 0) {
+                container.innerHTML = "<p>Сэтгэгдэл байхгүй</p>";
+                return;
+            }
+            container.innerHTML = reviews.map((r, idx) => `
+                <div class="review-item">
+                    <div><strong>${r.name}</strong>: ${r.text}</div>
+                    <button class="btn-danger" onclick="deleteReview(${idx})">Устгах</button>
+                </div>
+            `).join('');
+        }
+
+        function addReview() {
+            const name = document.getElementById("newReviewName").value.trim();
+            const text = document.getElementById("newReviewText").value.trim();
+            if (!name || !text) { alert("Нэр, сэтгэгдэлээ бөглөнө үү"); return; }
+            reviews.push({ name, text });
+            saveReviews();
+            renderReviews();
+            document.getElementById("newReviewName").value = "";
+            document.getElementById("newReviewText").value = "";
+            showNotification("Сэтгэгдэл нэмэгдлээ");
+        }
+
+        function deleteReview(idx) {
+            if (confirm("Сэтгэгдэл устгах уу?")) {
+                reviews.splice(idx, 1);
+                saveReviews();
+                renderReviews();
+                showNotification("Сэтгэгдэл устгагдлаа");
+            }
+        }
+
+        // Tab шилжүүлэг
+        function initTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tabName = btn.dataset.tab;
+                    document.getElementById('ordersTab').style.display = tabName === 'orders' ? 'block' : 'none';
+                    document.getElementById('productsTab').style.display = tabName === 'products' ? 'block' : 'none';
+                    document.getElementById('reviewsTab').style.display = tabName === 'reviews' ? 'block' : 'none';
+                    if (tabName === 'orders') renderOrders();
+                    if (tabName === 'products') renderProducts();
+                    if (tabName === 'reviews') renderReviews();
+                });
+            });
+        }
+
+        function showNotification(msg) {
+            const notif = document.createElement('div');
+            notif.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#1f6e4f; color:white; padding:12px 24px; border-radius:40px; z-index:2000;';
+            notif.innerText = msg;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 2000);
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            window.location.href = 'index.html';
+        }
+
+        // Нэвтрэлт шалгах
+        function checkAdminLogin() {
+            const isAdmin = localStorage.getItem('adminLoggedIn');
+            if (!isAdmin) {
+                const pwd = prompt("Админ нууц үгээ оруулна уу:");
+                if (pwd === 'admin123') {
+                    localStorage.setItem('adminLoggedIn', 'true');
+                } else {
+                    alert("Нууц үг буруу!");
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        // Init
+        function init() {
+            checkAdminLogin();
+            loadData();
+            renderStats();
+            renderOrders();
+            renderProducts();
+            renderReviews();
+            initTabs();
+        }
+        init();
+    </script>
+</body>
+</html>
